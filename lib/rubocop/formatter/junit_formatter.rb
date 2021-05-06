@@ -61,6 +61,9 @@ module RuboCop
       end
 
       def finished(_inspected_files)
+        REXML::Element.new('testcase', @testsuite).tap do |testcase|
+            testcase.attributes['classname'] = "class Name"
+            testcase.attributes['name'] = "cop name"
         @testsuite.add_attributes({ 'tests' => @test_counter, 'failures' => @offenses_counter })
         @document.write(output, 2)
       end
