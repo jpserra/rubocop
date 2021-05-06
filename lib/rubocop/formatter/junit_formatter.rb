@@ -19,8 +19,8 @@ module RuboCop
         super
 
         @document = REXML::Document.new.tap { |document| document << REXML::XMLDecl.new }
-        testsuites = REXML::Element.new('testsuites', @document)
-        testsuite = REXML::Element.new('testsuite', testsuites)
+        @testsuites = REXML::Element.new('testsuites', @document)
+        testsuite = REXML::Element.new('testsuite', @testsuites)
         @testsuite = testsuite.tap { |element| element.add_attributes('name' => 'rubocop') }
         @test_counter = 0
         @offenses_counter = 0
@@ -62,8 +62,7 @@ module RuboCop
       end
 
       def finished(_inspected_files)
-        @document.root.each_element_with_attribute('name', 'rubocop') do |e|
-          e.add_attributes({ 'tests' => @test_counter, 'failures' => @offenses_counter })
+        @testsuites.add_attributes({ 'tests' => @test_counter, 'failures' => @offenses_counter })
         end
 
         @document.write(output, 2)
