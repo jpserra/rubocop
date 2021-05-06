@@ -63,8 +63,6 @@ module RuboCop
 
       def finished(_inspected_files)
         @testsuites.add_attributes({ 'tests' => @test_counter, 'failures' => @offenses_counter })
-        end
-
         @document.write(output, 2)
       end
 
