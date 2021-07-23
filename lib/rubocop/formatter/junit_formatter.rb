@@ -19,9 +19,11 @@ module RuboCop
         super
 
         @document = REXML::Document.new.tap { |document| document << REXML::XMLDecl.new }
-        testsuites = REXML::Element.new('testsuites', @document)
-        testsuite = REXML::Element.new('testsuite', testsuites)
+        testsuite = REXML::Element.new('testsuite', @document)
         @testsuite = testsuite.tap { |element| element.add_attributes('name' => 'rubocop') }
+        @test_counter = 0
+        @offenses_counter = 0
+
       end
 
       def file_finished(file, offenses)
@@ -32,6 +34,8 @@ module RuboCop
         # In the future, it would be preferable to return only enabled cops.
         Cop::Registry.all.each do |cop|
           target_offenses = offenses_for_cop(offenses, cop)
+          @offenses_counter += target_offenses.length
+          @test_counter += 1
 
           next unless relevant_for_output?(options, target_offenses)
 
@@ -57,6 +61,11 @@ module RuboCop
       end
 
       def finished(_inspected_files)
+        REXML::Element.new('testcase', @testsuite).tap do |testcase|
+            testcase.attributes['classname'] = "class Name"
+            testcase.attributes['name'] = "cop name"
+        end
+        @testsuite.add_attributes({ 'tests' => @test_counter, 'failures' => @offenses_counter })
         @document.write(output, 2)
       end
 
